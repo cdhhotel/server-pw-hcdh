@@ -25,6 +25,13 @@ export class HotelRepository {
     });
   }
 
+  async update(id: string, data: any) {
+    return (prisma as any).hotel.update({
+      where: { id },
+      data
+    });
+  }
+
   async create(data: any) {
 
     return (prisma as any).hotel.create({

@@ -2,6 +2,7 @@ import { Router } from "express";
 
 import { CreateHotelService } from "../services/create-hotel.service.js";
 import { ReadHotelService } from "../services/read-hotel.service.js";
+import { UpdateHotelService } from "../services/update-hotel.service.js";
 
 const router = Router();
 
@@ -41,6 +42,17 @@ router.get("/hotels/:id", async (req, res) => {
     return res.json(result);
   } catch (err: any) {
     return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+router.put("/hotels/:id", async (req, res) => {
+  try {
+    const service = new UpdateHotelService();
+    const result = await service.execute(req.params.id, req.body);
+    return res.json(result);
+  } catch (err: any) {
+    const status = err.message === 'Hotel no encontrado' ? 404 : 400;
+    return res.status(status).json({ success: false, message: err.message });
   }
 });
 
