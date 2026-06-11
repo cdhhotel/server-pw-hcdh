@@ -1,4 +1,6 @@
 import { Router } from "express";
+import authRoutes from "./auth.routes.js";
+import hotelRoutes from "./hotel.routes.js";
 
 const router = Router();
 
@@ -13,5 +15,8 @@ router.get("/health", (_, res) => {
     });
 
 });
+
+router.use(authRoutes);
+router.use(hotelRoutes);
 
 export default router;

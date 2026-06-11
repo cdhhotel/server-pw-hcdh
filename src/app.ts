@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
-import router from "./routes/index.js";
+import router from "./routes/index.routes.js";
 import { swaggerUi, swaggerDocument } from "./config/swagger.js";
 
 const app = express();
