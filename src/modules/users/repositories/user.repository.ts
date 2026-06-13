@@ -4,9 +4,13 @@ export class UserRepository {
 
   async findByEmail(email: string) {
 
-    return (prisma as any).usuario.findUnique({
+    return prisma.usuario.findUnique({
       where: {
         email
+      },
+      include: {
+        rol: true,
+        hotel: true
       }
     });
 
@@ -14,8 +18,12 @@ export class UserRepository {
 
   async create(data: any) {
 
-    return (prisma as any).usuario.create({
-      data
+    return prisma.usuario.create({
+      data,
+      include: {
+        rol: true,
+        hotel: true
+      }
     });
 
   }

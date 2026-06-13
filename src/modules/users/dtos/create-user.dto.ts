@@ -1,5 +1,6 @@
 export interface CreateUserDTO {
   hotelId?: string;
+  hotel_id?: string;
 
   nombre: string;
 
@@ -11,5 +12,6 @@ export interface CreateUserDTO {
 
   telefono?: string;
 
-  rolId: string;
+  rolId?: string;
+  rol_id?: string;
 }

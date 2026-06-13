@@ -7,7 +7,7 @@ export class CreateUserService {
   constructor(
     private userRepository =
       new UserRepository()
-  ) {}
+  ) { }
 
   async execute(data: any) {
 
@@ -33,7 +33,10 @@ export class CreateUserService {
         .create({
 
           hotel_id:
-            data.hotelId,
+            data.hotelId || data.hotel_id || "6547a35d-d6d8-4b4a-80f7-aed8c8885811",
+
+          rol_id:
+            data.rolId || data.rol_id || "ca19835e-926c-4f26-8d46-50823f8211d9",
 
           nombre:
             data.nombre,
@@ -51,6 +54,7 @@ export class CreateUserService {
             data.telefono
         });
 
+    console.log(user);
     return user;
 
   }

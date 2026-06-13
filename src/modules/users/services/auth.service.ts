@@ -8,9 +8,9 @@ export class AuthService {
 
   constructor(
     private userRepository = new UserRepository()
-  ) {}
+  ) { }
 
-  async login(data: { email: string; password: string }) {
+  async login(data: { email: string; password: string, rol: string, hotel: string }) {
 
     const user = await this.userRepository.findByEmail(data.email);
 
@@ -36,7 +36,9 @@ export class AuthService {
         nombre: user.nombre,
         apellidos: user.apellidos,
         email: user.email,
-        telefono: user.telefono
+        telefono: user.telefono,
+        rol: user.rol,
+        hotel: user.hotel
       },
       token
     };
