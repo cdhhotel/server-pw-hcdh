@@ -170,7 +170,7 @@ model reservacion {
   id                  String                  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   folio               String                  @unique @db.VarChar(15)
   habitacion_id       String                  @db.Uuid
-  usuario_id          String                  @db.Uuid
+  usuario_id          String?                 @db.Uuid
   fecha_entrada       DateTime                @db.Date
   fecha_salida        DateTime                @db.Date
   cantidad_huespedes  Int                     @db.SmallInt
