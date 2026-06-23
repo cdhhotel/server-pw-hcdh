@@ -24,6 +24,18 @@ model bitacora_auditoria {
   @@index([usuario_id], map: "idx_bitacora_usuario")
 }
 
+model evento_local {
+  id               String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nombre           String         @db.VarChar(150)
+  fecha_inicio     DateTime?      @db.Date
+  fecha_fin        DateTime?      @db.Date
+  mes_referencia   String?        @db.VarChar(20)
+  descripcion      String?
+  sitio_cercano_id String?        @db.Uuid
+  created_at       DateTime?      @default(now()) @db.Timestamptz(6)
+  sitio_cercano    sitio_cercano? @relation(fields: [sitio_cercano_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+}
+
 model habitacion {
   id                  String                @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   hotel_id            String                @db.Uuid
@@ -120,6 +132,7 @@ model itinerario {
   usuario_id          String        @db.Uuid
   reservacion_id      String?       @db.Uuid
   sitio_cercano_id    String        @db.Uuid
+  atributos_extra     Json?
   reservacion         reservacion?  @relation(fields: [reservacion_id], references: [id], onUpdate: NoAction, map: "fk_itinerario_reservacion")
   sitio_cercano       sitio_cercano @relation(fields: [sitio_cercano_id], references: [id], onUpdate: NoAction, map: "fk_itinerario_sitio_cercano")
   usuario             usuario       @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_itinerario_usuario")
@@ -194,8 +207,8 @@ model reservacion {
 }
 
 model rol {
-  id          String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  nombre      String  @unique @db.VarChar(50)
+  id          String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nombre      String    @unique @db.VarChar(50)
   descripcion String?
   usuario     usuario[]
 }
@@ -209,22 +222,27 @@ model servicio {
 }
 
 model sitio_cercano {
-  id                      String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  hotel_id                String       @db.Uuid
-  nombre                  String       @db.VarChar(150)
-  categoria               String       @db.VarChar(50)
+  id                      String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  hotel_id                String         @db.Uuid
+  nombre                  String         @db.VarChar(150)
+  categoria               String         @db.VarChar(50)
   direccion               String?
-  latitud                 Decimal      @db.Decimal(10, 8)
-  longitud                Decimal      @db.Decimal(11, 8)
-  distancia_km            Decimal?     @db.Decimal(6, 2)
-  tiempo_estimado_minutos Int?         @db.SmallInt
-  telefono                String?      @db.VarChar(20)
-  sitio_web               String?      @db.VarChar(200)
+  latitud                 Decimal        @db.Decimal(10, 8)
+  longitud                Decimal        @db.Decimal(11, 8)
+  distancia_km            Decimal?       @db.Decimal(6, 2)
+  tiempo_estimado_minutos Int?           @db.SmallInt
+  telefono                String?        @db.VarChar(20)
+  sitio_web               String?        @db.VarChar(200)
   horario                 String?
-  calificacion            Decimal?     @db.Decimal(2, 1)
-  created_at              DateTime?    @default(now()) @db.Timestamptz(6)
+  calificacion            Decimal?       @db.Decimal(2, 1)
+  descripcion             String?
+  servicios               String?
+  redes_sociales          String?        @db.VarChar(150)
+  link_maps               String?
+  created_at              DateTime?      @default(now()) @db.Timestamptz(6)
   itinerario              itinerario[]
-  hotel                   hotel        @relation(fields: [hotel_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  evento_local            evento_local[]
+  hotel                   hotel          @relation(fields: [hotel_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([categoria], map: "idx_sitio_cercano_categoria")
 }
@@ -248,6 +266,7 @@ model usuario {
   itinerario         itinerario[]
   hotel              hotel?               @relation(fields: [hotel_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   rol                rol?                 @relation(fields: [rol_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
   @@index([email], map: "idx_usuario_email", where: raw("(deleted_at IS NULL)"))
 }
 

@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { prisma } from "../../../config/database.js";
 
 import { CreateHotelService } from "../services/create-hotel.service.js";
 import { ReadHotelService } from "../services/read-hotel.service.js";
@@ -56,6 +57,28 @@ router.put("/hotels/:id", async (req, res) => {
   }
 });
 
+// GET /sitios-cercanos — lista todos los sitios cercanos (para selectores en formularios)
+router.get("/sitios-cercanos", async (req, res) => {
+  try {
+    const { categoria, hotel_id } = req.query;
+    const where: any = {};
+    if (categoria) where.categoria = String(categoria);
+    if (hotel_id) where.hotel_id = String(hotel_id);
 
+    const sitios = await (prisma as any).sitio_cercano.findMany({
+      where,
+      include: {
+        evento_local: {
+          orderBy: { fecha_inicio: "asc" },
+        },
+      },
+      orderBy: { nombre: "asc" },
+    });
+    return res.json({ success: true, data: sitios });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
 
 export default router;
+
