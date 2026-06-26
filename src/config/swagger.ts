@@ -13,7 +13,7 @@ export const swaggerDocument = {
       description: "Servidor Local",
     },
     {
-      url: "https://server-casa-dolores.onrender.com/api",
+      url: "https://hotel-casa-dolores-demo.netlify.app/",
       description: "Servidor en la nube",
     },
   ],
