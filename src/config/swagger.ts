@@ -12,6 +12,10 @@ export const swaggerDocument = {
       url: "http://localhost:3000/api",
       description: "Servidor Local",
     },
+    {
+      url: "https://server-casa-dolores.onrender.com/api",
+      description: "Servidor en la nube",
+    },
   ],
   paths: {
     "/health": {
