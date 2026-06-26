@@ -1,7 +1,7 @@
 import { ReservationRepository } from "../repositories/reservation.repository.js";
 
 export class ReservationService {
-  constructor(private reservationRepository = new ReservationRepository()) {}
+  constructor(private reservationRepository = new ReservationRepository()) { }
 
   /**
    * Permite consultar una reservación por folio y correo electrónico
@@ -48,6 +48,29 @@ export class ReservationService {
     };
   }
 
+  async confirm(id: string) {
+    const reservacion = await this.reservationRepository.findById(id);
+    if (!reservacion) {
+      throw new Error("La reservación no existe.");
+    }
+
+    if (reservacion.estado === "cancelada") {
+      throw new Error("La reservación ya se encuentra cancelada.");
+    }
+
+    if (reservacion.estado === "finalizada" || reservacion.estado === "activa") {
+      throw new Error(`No se puede confirmar una reservación con estado: ${reservacion.estado}.`);
+    }
+
+    const confirmada = await this.reservationRepository.updateStatus(id, "confirmada");
+
+    return {
+      success: true,
+      message: "Reservación confirmada correctamente.",
+      data: confirmada,
+    };
+  }
+
   /**
    * Permite cancelar una reservación de invitado validando su folio y correo
    */
@@ -71,6 +94,17 @@ export class ReservationService {
       success: true,
       message: "Reservación cancelada correctamente.",
       data: cancelada,
+    };
+  }
+
+  /**
+   * Obtiene todas las reservaciones registradas
+   */
+  async getAll() {
+    const reservaciones = await this.reservationRepository.findAll();
+    return {
+      success: true,
+      data: reservaciones,
     };
   }
 }

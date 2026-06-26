@@ -15,6 +15,17 @@ function extractMessage(err: unknown): string {
   return String(err);
 }
 
+// GET /reservations — obtener todas las reservaciones (para administración)
+router.get("/", async (req: Request, res: Response) => {
+  try {
+    const service = new ReservationService();
+    const result = await service.getAll();
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ success: false, message: extractMessage(err) });
+  }
+});
+
 // POST /reservations — registrar una nueva reservación (público / para clientes e invitados)
 router.post("/", async (req: Request, res: Response) => {
   try {
@@ -59,6 +70,16 @@ router.post("/:id/cancelar", async (req: Request, res: Response) => {
   try {
     const service = new ReservationService();
     const result = await service.cancel(String(req.params.id));
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ success: false, message: extractMessage(err) });
+  }
+});
+
+router.post("/:id/confirmar", async (req: Request, res: Response) => {
+  try {
+    const service = new ReservationService();
+    const result = await service.confirm(String(req.params.id));
     res.json(result);
   } catch (err) {
     res.status(400).json({ success: false, message: extractMessage(err) });

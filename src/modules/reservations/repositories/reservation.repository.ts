@@ -247,4 +247,27 @@ export class ReservationRepository {
             },
         });
     }
+
+    /**
+     * Obtiene todas las reservaciones
+     */
+    async findAll() {
+        return prisma.reservacion.findMany({
+            where: {
+                deleted_at: null,
+            },
+            include: {
+                habitacion: true,
+                huesped_reservacion: {
+                    include: {
+                        huesped: true,
+                    },
+                },
+                pago: true,
+            },
+            orderBy: {
+                created_at: 'desc',
+            },
+        });
+    }
 }
