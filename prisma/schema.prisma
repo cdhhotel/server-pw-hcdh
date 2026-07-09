@@ -31,9 +31,10 @@ model evento_local {
   fecha_fin        DateTime?      @db.Date
   mes_referencia   String?        @db.VarChar(20)
   descripcion      String?
+  horarios_json    Json?
   sitio_cercano_id String?        @db.Uuid
   created_at       DateTime?      @default(now()) @db.Timestamptz(6)
-  sitio_cercano    sitio_cercano? @relation(fields: [sitio_cercano_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  sitio_cercano    sitio_cercano? @relation(fields: [sitio_cercano_id], references: [id], onUpdate: NoAction)
 }
 
 model habitacion {
@@ -234,14 +235,18 @@ model sitio_cercano {
   telefono                String?        @db.VarChar(20)
   sitio_web               String?        @db.VarChar(200)
   horario                 String?
+  horarios_json           Json?
   calificacion            Decimal?       @db.Decimal(2, 1)
+  created_at              DateTime?      @default(now()) @db.Timestamptz(6)
   descripcion             String?
   servicios               String?
-  redes_sociales          String?        @db.VarChar(150)
+  redes_sociales          String?
   link_maps               String?
-  created_at              DateTime?      @default(now()) @db.Timestamptz(6)
-  itinerario              itinerario[]
+  especificaciones        String?
+  correo_contacto         String?        @db.VarChar(150)
+  imagen_url              String?
   evento_local            evento_local[]
+  itinerario              itinerario[]
   hotel                   hotel          @relation(fields: [hotel_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([categoria], map: "idx_sitio_cercano_categoria")
