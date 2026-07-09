@@ -3,6 +3,7 @@ import authRoutes from "./auth.routes.js";
 import hotelRoutes from "./hotel.routes.js";
 import roomRoutes from "./room.routes.js";
 import reservationRoutes from "./reservation.routes.js";
+import itineraryRoutes from "./itinerary.routes.js";
 
 const router = Router();
 
@@ -22,5 +23,6 @@ router.use(authRoutes);
 router.use(hotelRoutes);
 router.use(roomRoutes);
 router.use(reservationRoutes);
+router.use(itineraryRoutes);
 
 export default router;
