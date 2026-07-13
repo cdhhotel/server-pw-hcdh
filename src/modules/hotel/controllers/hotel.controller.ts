@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { prisma } from "../../../config/database.js";
+import { uploadItineraryImages } from "../../../middlewares/upload.middleware.js";
 
 import { CreateHotelService } from "../services/create-hotel.service.js";
 import { ReadHotelService } from "../services/read-hotel.service.js";
@@ -95,16 +96,27 @@ router.get("/sitios-cercanos", async (req, res) => {
   }
 });
 
-router.post("/sitios-cercanos", async (req, res) => {
+router.post("/sitios-cercanos", uploadItineraryImages.single("imagenFile"), async (req, res) => {
   try {
     const { 
       nombre, categoria, direccion, latitud, longitud, 
       distancia_km, tiempo_estimado_minutos, telefono, 
       sitio_web, horario, descripcion,
       servicios, redes_sociales, link_maps,
-      especificaciones, correo_contacto, calificacion,
-      imagen_url, evento_local, horarios_json
+      especificaciones, correo_contacto, calificacion
     } = req.body;
+
+    let { imagen_url, evento_local, horarios_json } = req.body;
+
+    if (typeof evento_local === "string") {
+      try { evento_local = JSON.parse(evento_local); } catch (e) {}
+    }
+    if (typeof horarios_json === "string") {
+      try { horarios_json = JSON.parse(horarios_json); } catch (e) {}
+    }
+    if (req.file) {
+      imagen_url = `/uploads/itinerary/${req.file.filename}`;
+    }
 
     // Validaciones de rangos numéricos para evitar desbordamiento (numeric field overflow)
     if (latitud === undefined || latitud === "") {
@@ -190,7 +202,7 @@ router.post("/sitios-cercanos", async (req, res) => {
   }
 });
 
-router.put("/sitios-cercanos/:id", async (req, res) => {
+router.put("/sitios-cercanos/:id", uploadItineraryImages.single("imagenFile"), async (req, res) => {
   try {
     const { id } = req.params;
     const { 
@@ -198,9 +210,20 @@ router.put("/sitios-cercanos/:id", async (req, res) => {
       distancia_km, tiempo_estimado_minutos, telefono, 
       sitio_web, horario, descripcion,
       servicios, redes_sociales, link_maps,
-      especificaciones, correo_contacto, calificacion,
-      imagen_url, evento_local, horarios_json
+      especificaciones, correo_contacto, calificacion
     } = req.body;
+
+    let { imagen_url, evento_local, horarios_json } = req.body;
+
+    if (typeof evento_local === "string") {
+      try { evento_local = JSON.parse(evento_local); } catch (e) {}
+    }
+    if (typeof horarios_json === "string") {
+      try { horarios_json = JSON.parse(horarios_json); } catch (e) {}
+    }
+    if (req.file) {
+      imagen_url = `/uploads/itinerary/${req.file.filename}`;
+    }
 
     // Validaciones de rangos numéricos para evitar desbordamiento (numeric field overflow)
     let parsedLat: number | undefined = undefined;
@@ -320,9 +343,25 @@ router.get("/eventos-locales", async (req, res) => {
 });
 
 // POST /eventos-locales
-router.post("/eventos-locales", async (req, res) => {
+router.post("/eventos-locales", uploadItineraryImages.single("imagenFile"), async (req, res) => {
+  console.log("POST /eventos-locales");
+  console.log("Content-Type:", req.headers["content-type"]);
+  console.log("req.body:", req.body);
+  console.log("req.file:", req.file);
   try {
-    const { nombre, fecha_inicio, fecha_fin, mes_referencia, descripcion, sitio_cercano_id, horarios_json } = req.body;
+    if (!req.body) {
+      return res.status(400).json({ success: false, message: "req.body is undefined. Content-Type: " + req.headers["content-type"] });
+    }
+    const { nombre, fecha_inicio, fecha_fin, mes_referencia, descripcion, sitio_cercano_id, link_maps, latitud, longitud } = req.body;
+    let { horarios_json, imagen_url } = req.body;
+
+    if (typeof horarios_json === "string") {
+      try { horarios_json = JSON.parse(horarios_json); } catch (e) {}
+    }
+    if (req.file) {
+      imagen_url = `/uploads/itinerary/${req.file.filename}`;
+    }
+
     const evento = await (prisma as any).evento_local.create({
       data: {
         nombre: nombre ? String(nombre).substring(0, 150) : "Evento",
@@ -331,7 +370,11 @@ router.post("/eventos-locales", async (req, res) => {
         mes_referencia: mes_referencia ? String(mes_referencia).substring(0, 20) : null,
         descripcion,
         sitio_cercano_id: sitio_cercano_id || null,
-        horarios_json: horarios_json || null
+        horarios_json: horarios_json || null,
+        imagen_url: imagen_url ? String(imagen_url) : null,
+        link_maps: link_maps ? String(link_maps) : null,
+        latitud: latitud ? Number(latitud) : null,
+        longitud: longitud ? Number(longitud) : null
       }
     });
     return res.status(201).json({ success: true, data: evento });
@@ -341,10 +384,19 @@ router.post("/eventos-locales", async (req, res) => {
 });
 
 // PUT /eventos-locales/:id
-router.put("/eventos-locales/:id", async (req, res) => {
+router.put("/eventos-locales/:id", uploadItineraryImages.single("imagenFile"), async (req, res) => {
   try {
     const { id } = req.params;
-    const { nombre, fecha_inicio, fecha_fin, mes_referencia, descripcion, sitio_cercano_id, horarios_json } = req.body;
+    const { nombre, fecha_inicio, fecha_fin, mes_referencia, descripcion, sitio_cercano_id, link_maps, latitud, longitud } = req.body;
+    let { horarios_json, imagen_url } = req.body;
+
+    if (typeof horarios_json === "string") {
+      try { horarios_json = JSON.parse(horarios_json); } catch (e) {}
+    }
+    if (req.file) {
+      imagen_url = `/uploads/itinerary/${req.file.filename}`;
+    }
+
     const evento = await (prisma as any).evento_local.update({
       where: { id },
       data: {
@@ -354,7 +406,11 @@ router.put("/eventos-locales/:id", async (req, res) => {
         mes_referencia: mes_referencia !== undefined ? (mes_referencia ? String(mes_referencia).substring(0, 20) : null) : undefined,
         descripcion,
         sitio_cercano_id: sitio_cercano_id !== undefined ? (sitio_cercano_id || null) : undefined,
-        horarios_json: horarios_json !== undefined ? (horarios_json || null) : undefined
+        horarios_json: horarios_json !== undefined ? (horarios_json || null) : undefined,
+        imagen_url: imagen_url !== undefined ? (imagen_url ? String(imagen_url) : null) : undefined,
+        link_maps: link_maps !== undefined ? (link_maps ? String(link_maps) : null) : undefined,
+        latitud: latitud !== undefined ? (latitud ? Number(latitud) : null) : undefined,
+        longitud: longitud !== undefined ? (longitud ? Number(longitud) : null) : undefined
       }
     });
     return res.json({ success: true, data: evento });
