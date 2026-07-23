@@ -32,12 +32,13 @@ export class UpdateItineraryService {
     const newDescripcion = data.descripcion !== undefined ? data.descripcion : oldExtra.descripcion;
     const newCategoria = data.categoria !== undefined ? data.categoria : oldExtra.categoria;
 
-    // Manejar imagen: si se sube nueva, eliminar la anterior físicamente
     let finalImageUrl = oldExtra.imagen_url ?? null;
 
-    if (newUploadedFile !== null) {
+    if (data.imagen_url && data.imagen_url.startsWith('data:image/')) {
+      finalImageUrl = data.imagen_url;
+    } else if (newUploadedFile !== null) {
       // Eliminar imagen anterior si existe
-      if (finalImageUrl) {
+      if (finalImageUrl && !finalImageUrl.startsWith("data:image/")) {
         const relativePath = finalImageUrl.startsWith("/") ? finalImageUrl.slice(1) : finalImageUrl;
         const absolutePath = path.join(process.cwd(), relativePath);
         if (fs.existsSync(absolutePath)) {

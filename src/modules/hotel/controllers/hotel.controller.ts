@@ -114,7 +114,7 @@ router.post("/sitios-cercanos", uploadItineraryImages.single("imagenFile"), asyn
     if (typeof horarios_json === "string") {
       try { horarios_json = JSON.parse(horarios_json); } catch (e) {}
     }
-    if (req.file) {
+    if (req.file && (!imagen_url || !String(imagen_url).startsWith("data:image/"))) {
       imagen_url = `/uploads/itinerary/${req.file.filename}`;
     }
 
@@ -221,7 +221,7 @@ router.put("/sitios-cercanos/:id", uploadItineraryImages.single("imagenFile"), a
     if (typeof horarios_json === "string") {
       try { horarios_json = JSON.parse(horarios_json); } catch (e) {}
     }
-    if (req.file) {
+    if (req.file && (!imagen_url || !String(imagen_url).startsWith("data:image/"))) {
       imagen_url = `/uploads/itinerary/${req.file.filename}`;
     }
 
@@ -358,7 +358,7 @@ router.post("/eventos-locales", uploadItineraryImages.single("imagenFile"), asyn
     if (typeof horarios_json === "string") {
       try { horarios_json = JSON.parse(horarios_json); } catch (e) {}
     }
-    if (req.file) {
+    if (req.file && (!imagen_url || !String(imagen_url).startsWith("data:image/"))) {
       imagen_url = `/uploads/itinerary/${req.file.filename}`;
     }
 
@@ -393,7 +393,7 @@ router.put("/eventos-locales/:id", uploadItineraryImages.single("imagenFile"), a
     if (typeof horarios_json === "string") {
       try { horarios_json = JSON.parse(horarios_json); } catch (e) {}
     }
-    if (req.file) {
+    if (req.file && (!imagen_url || !String(imagen_url).startsWith("data:image/"))) {
       imagen_url = `/uploads/itinerary/${req.file.filename}`;
     }
 

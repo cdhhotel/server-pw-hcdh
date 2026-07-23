@@ -28,7 +28,7 @@ export class CreateItineraryService {
     const atributos_extra: any = {
       descripcion: normalized.descripcion,
       categoria: normalized.categoria,
-      imagen_url: uploadedFile ?? null,
+      imagen_url: (data.imagen_url && data.imagen_url.startsWith('data:image/')) ? data.imagen_url : (uploadedFile ?? data.imagen_url ?? null),
     };
 
     const itinerary = await this.itineraryRepository.create({
