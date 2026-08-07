@@ -270,4 +270,17 @@ export class ReservationRepository {
             },
         });
     }
+
+    /**
+     * Elimina una reservación (soft delete asignando la fecha de eliminación)
+     */
+    async delete(id: string) {
+        return prisma.reservacion.update({
+            where: { id },
+            data: {
+                deleted_at: new Date(),
+            },
+        });
+    }
 }
+

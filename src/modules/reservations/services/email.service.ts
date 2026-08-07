@@ -216,10 +216,7 @@ export class EmailService {
             <td style="padding: 6px 0; font-size: 14px; color: #5a524a;">Subtotal por estancia ({{noches}} {{noches_label}})</td>
             <td align="right" style="padding: 6px 0; font-size: 14px; font-weight: bold; color: #3d3730;">\${{subtotal}} MXN</td>
           </tr>
-          <tr>
-            <td style="padding: 6px 0; font-size: 14px; color: #5a524a;">Impuestos (16% IVA)</td>
-            <td align="right" style="padding: 6px 0; font-size: 14px; font-weight: bold; color: #3d3730;">\${{impuestos}} MXN</td>
-          </tr>
+
           <tr>
             <td style="padding: 6px 0; font-size: 14px; color: #5a524a;">Método de Pago</td>
             <td align="right" style="padding: 6px 0; font-size: 14px; font-weight: bold; color: #3d3730;">Efectivo (al check-in)</td>

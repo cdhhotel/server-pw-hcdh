@@ -107,4 +107,22 @@ export class ReservationService {
       data: reservaciones,
     };
   }
+
+  /**
+   * Elimina una reservación por ID
+   */
+  async delete(id: string) {
+    const reservacion = await this.reservationRepository.findById(id);
+    if (!reservacion) {
+      throw new Error("La reservación no existe.");
+    }
+
+    await this.reservationRepository.delete(id);
+
+    return {
+      success: true,
+      message: "Reservación eliminada correctamente.",
+    };
+  }
 }
+

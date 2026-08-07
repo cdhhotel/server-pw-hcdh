@@ -107,4 +107,16 @@ router.post("/cancelar-invitado", async (req: Request, res: Response) => {
   }
 });
 
+// DELETE /reservations/:id — eliminar reservación por ID (administración)
+router.delete("/:id", async (req: Request, res: Response) => {
+  try {
+    const service = new ReservationService();
+    const result = await service.delete(String(req.params.id));
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ success: false, message: extractMessage(err) });
+  }
+});
+
 export default router;
+

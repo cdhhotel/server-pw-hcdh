@@ -55,23 +55,17 @@ router.post("/room-register", async (req, res) => {
     }
 });
 
-// GET /rooms — listar habitaciones con filtros opcionales
+// GET /rooms — listar habitaciones con filtros opcionales (incluyendo disponibilidad por fechas)
 router.get("/rooms", async (req, res) => {
     try {
         const service = new ReadRoomService();
-        const { nombre, tipo, precio } = req.query;
-        const filter: Record<string, unknown> = {};
-
-        if (nombre) filter["nombre"] = { contains: String(nombre), mode: 'insensitive' };
-        if (tipo) filter["tipo_habitacion"] = { equals: String(tipo) };
-        if (precio) filter["precio_base_noche"] = { equals: Number(precio) };
-
-        const result = await service.execute(filter);
+        const result = await service.execute(req.query);
         res.json(result);
     } catch (err) {
         res.status(500).json({ success: false, message: extractMessage(err) });
     }
 });
+
 
 // GET /rooms/:id — obtener una habitación por ID
 router.get("/rooms/:id", async (req, res) => {

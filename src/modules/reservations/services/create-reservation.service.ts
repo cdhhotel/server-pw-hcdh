@@ -70,9 +70,10 @@ export class CreateReservationService {
         const precioBaseNoche = Number(room.precio_base_noche);
         const precioTotalNoches = precioBaseNoche * numeroNoches;
 
-        // Calcular impuestos (16% de IVA estándar)
-        const impuestos = precioTotalNoches * 0.16;
-        const totalPagar = precioTotalNoches + impuestos;
+        // Sin impuestos adicionales (IVA no aplicado)
+        const impuestos = 0;
+        const totalPagar = precioTotalNoches;
+
 
         // 6. Generar folio único
         const folio = await this.generateUniqueFolio();
