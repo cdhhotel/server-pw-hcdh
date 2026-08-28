@@ -12,7 +12,7 @@ export const createRoomSchema = z.object({
   numero_camas: z.coerce.number().int().nonnegative("El número de camas debe ser mayor o igual a 0").max(4),
   tipo_camas: z.string().max(50, "El tipo de camas no debe exceder 50 caracteres").optional().nullable(),
   metros_cuadrados: z.coerce.number().int().positive("Los metros cuadrados deben ser mayores a 0").optional().nullable(),
-  estatus: z.enum(["disponible", "mantenimiento", "ocupada"]).default("disponible"),
+  estatus: z.enum(["disponible", "mantenimiento", "ocupada", "limpieza"]).default("disponible"),
   atributos_extra: z.any().optional(),
 });
 

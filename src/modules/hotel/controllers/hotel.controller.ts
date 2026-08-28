@@ -419,16 +419,106 @@ router.put("/eventos-locales/:id", uploadItineraryImages.single("imagenFile"), a
   }
 });
 
-// DELETE /eventos-locales/:id
-router.delete("/eventos-locales/:id", async (req, res) => {
+// Cache temporal en memoria de la calificación de Airbnb
+let airbnbCacheData = {
+  rating: 4.77,
+  maxRating: 5.0,
+  totalReviews: 13,
+  listingTitle: "Casa Dolores Hidalgo, hab 9",
+  listingUrl: "https://www.airbnb.mx/rooms/1245181293769210016?check_in=2026-09-08&check_out=2026-09-09",
+  categoryRatings: [
+    { label: "Limpieza", score: 4.5 },
+    { label: "Veracidad", score: 4.6 },
+    { label: "Llegada", score: 4.8 },
+    { label: "Comunicación", score: 4.8 },
+    { label: "Ubicación", score: 5.0 },
+    { label: "Calidad-precio", score: 4.8 }
+  ],
+  lastUpdated: new Date().toISOString()
+};
+
+async function fetchLiveAirbnbData(listingUrl: string) {
   try {
-    const { id } = req.params;
-    await (prisma as any).evento_local.delete({ where: { id } });
-    return res.json({ success: true, message: "Evento eliminado correctamente" });
+    const res = await fetch(listingUrl, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept-Language": "es-MX,es;q=0.9,en-US;q=0.8,en;q=0.7"
+      }
+    });
+
+    if (!res.ok) return null;
+    const html = await res.text();
+
+    let rating: number | null = null;
+    let reviewCount: number | null = null;
+
+    const ogMatch = html.match(/([0-9]+\.[0-9]+)\s*·\s*([0-9]+)\s*(evaluac|reseña|review)/i);
+    if (ogMatch) {
+      rating = parseFloat(ogMatch[1]);
+      reviewCount = parseInt(ogMatch[2], 10);
+    }
+
+    if (!rating) {
+      const ratingMatch = html.match(/"ratingValue"\s*:\s*"?([0-9\.]+)"?/i) || html.match(/"rating"\s*:\s*([0-9\.]+)/i);
+      if (ratingMatch) rating = parseFloat(ratingMatch[1]);
+    }
+    if (!reviewCount) {
+      const reviewMatch = html.match(/"reviewCount"\s*:\s*"?([0-9]+)"?/i);
+      if (reviewMatch) reviewCount = parseInt(reviewMatch[1], 10);
+    }
+
+    if (rating && !isNaN(rating) && rating > 0 && rating <= 5) {
+      return {
+        rating,
+        totalReviews: reviewCount && !isNaN(reviewCount) ? reviewCount : airbnbCacheData.totalReviews
+      };
+    }
+  } catch (err) {
+    console.error("[AirbnbFetchError]", err);
+  }
+  return null;
+}
+
+// GET /hotel/airbnb-rating — Obtiene la calificación actual de Airbnb
+router.get("/airbnb-rating", async (req, res) => {
+  try {
+    const { forceRefresh } = req.query;
+    const now = new Date().getTime();
+    const lastCheck = new Date(airbnbCacheData.lastUpdated).getTime();
+    const isStale = (now - lastCheck) > 4 * 60 * 60 * 1000; // 4 horas
+
+    if (forceRefresh === "true" || isStale) {
+      const live = await fetchLiveAirbnbData(airbnbCacheData.listingUrl);
+      if (live) {
+        airbnbCacheData.rating = live.rating;
+        airbnbCacheData.totalReviews = live.totalReviews;
+        airbnbCacheData.lastUpdated = new Date().toISOString();
+      }
+    }
+
+    return res.json({ success: true, data: airbnbCacheData });
   } catch (err: any) {
     return res.status(500).json({ success: false, message: err.message });
   }
 });
 
+// PUT /hotel/airbnb-rating — Permite actualizar manualmente la calificación
+router.put("/airbnb-rating", async (req, res) => {
+  try {
+    const { rating, totalReviews, listingTitle, listingUrl, categoryRatings } = req.body;
+    if (rating !== undefined) airbnbCacheData.rating = Number(rating);
+    if (totalReviews !== undefined) airbnbCacheData.totalReviews = Number(totalReviews);
+    if (listingTitle !== undefined) airbnbCacheData.listingTitle = String(listingTitle);
+    if (listingUrl !== undefined) airbnbCacheData.listingUrl = String(listingUrl);
+    if (Array.isArray(categoryRatings)) airbnbCacheData.categoryRatings = categoryRatings;
+    airbnbCacheData.lastUpdated = new Date().toISOString();
+
+    return res.json({ success: true, message: "Calificación de Airbnb actualizada correctamente", data: airbnbCacheData });
+  } catch (err: any) {
+    return res.status(400).json({ success: false, message: err.message });
+  }
+});
+
 export default router;
+
 

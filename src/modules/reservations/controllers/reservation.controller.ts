@@ -86,6 +86,17 @@ router.post("/:id/confirmar", async (req: Request, res: Response) => {
   }
 });
 
+// POST /reservations/:id/checkout — realizar Check-Out
+router.post("/:id/checkout", async (req: Request, res: Response) => {
+  try {
+    const service = new ReservationService();
+    const result = await service.checkout(String(req.params.id));
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ success: false, message: extractMessage(err) });
+  }
+});
+
 // POST /reservations/cancelar-invitado — cancelar reservación por folio y correo (para invitados)
 router.post("/cancelar-invitado", async (req: Request, res: Response) => {
   try {
